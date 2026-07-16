@@ -1,17 +1,17 @@
 import json
-from typing import TypedDict
+from typing import TypedDict, NotRequired
 from config import RECIPES_FILE
 
 class RecipeIngredients(TypedDict):
-     ingredient:str
-     quantity:float
-     unit:str
+     ingredient: str
+     quantity: float
+     unit: str
 
 class Recipe(TypedDict):
-    en:str
-    aliases:list[str]
-    ingredients:list[RecipeIngredients]
-    instructions:list[str]
+    en: str
+    aliases: NotRequired[list[str]]
+    ingredients: list[RecipeIngredients]
+    instructions: list[str]
 
 
 def load_recipes(filepath:str)->dict:
@@ -20,14 +20,17 @@ def load_recipes(filepath:str)->dict:
     return recipes
 
 
-def recipe_search(recipes:dict[str, Recipe], recipe_name:str)->Recipe:
+def recipe_search(recipes:dict[str, Recipe], recipe_name:str)->str:
         searched = recipe_name.lower()
-        for recipe in recipes.values():
+        for recipe_d, recipe in recipes.items():
             if (searched == recipe["en"].lower()
                 or any(searched == alias.lower() for alias in recipe["aliases"])
                 ):
-                    return recipe
-        raise ValueError(f"Recipe for {recipe_name} not found.")
+                    return recipe_id
+        raise ValueError
+
+def view_recipe(recipes:dict[str, Recipe], recipe_id:str)->Recipe:
+     return recipes[recipe_id]
         
 def recipe_exists(recipes:dict[str, Recipe], recipe_name:str)->bool:
         searched = recipe_name.lower()
@@ -38,15 +41,16 @@ def recipe_exists(recipes:dict[str, Recipe], recipe_name:str)->bool:
                     return True
         return False
 
-def create_recipe(recipes:dict[str, Recipe], recipe_id:str, recipe:Recipe):
-    if recipe_exists(recipes, recipe_id):
-         raise ValueError(f"{recipe["en"]} already in the cookbook. Please use 'search' option.")
-    # TODO : ajouter recette au dict
-    # TODO : sauvegarde de la recette dans le fichier
+def add_recipe_to_cookbook(recipes:dict[str, Recipe], recipe_id:str, recipe:Recipe):
+    recipes[recipe_id] = recipe
+
+def save_recipe(filepath:str, recipes:dict[str, Recipe]):
+    with open(filepath, "w") as file:
+         json.dump(recipes, file, indent=4, sort_keys=True)
     
+def modify_recipe(recipes:dict[str, Recipe], recipe_id:str, field:str, value:str):
+     recipes[recipe_id][field] = value
+          
 
-def modify_recipe(recipes:dict[str, Recipe], recipe_name:str):
-     pass
-
-def delete_recipe(recipes:dict[str, Recipe], recipe_name:str):
-    pass
+def delete_recipe(recipes:dict[str, Recipe], recipe_id:str):
+    del recipes[recipe_id]
