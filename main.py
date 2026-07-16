@@ -1,6 +1,7 @@
 import json
 import pprint
 from config import RECIPES_FILE, INGREDIENTS_FILE
+from normalize import recipe_name_to_id
 from recipes import (
     Recipe, 
     load_recipes, 
@@ -15,7 +16,7 @@ from recipes import (
 
 def create_recipe(recipes):
     recipe_name = input("Enter a new recipe name: ")
-    #TODO: ajout normalisation de recipe_name à recipe_id
+    recipe_id = recipe_name_to_id(recipe_name)
     if recipe_exists(recipes, recipe_name):
          raise ValueError(
              f"{recipe_id} already in the cookbook. Please use 'search' option."
@@ -30,7 +31,7 @@ def create_recipe(recipes):
             "Enter an alias. If several, separate by commas: "
             ).strip().split(",")
     
-    recipe_id["ingredients"] #TODO
+    #TODO: ingredients
     
     instructions = input(
         "Enter instructions. Please separate steps by semi-colons (e.g Melt butter;Add flour): "
@@ -38,17 +39,13 @@ def create_recipe(recipes):
     
     recipe: Recipe = {
         "en": recipe_name,
-        "ingredients":ingredients,
+        #TODO: ingredients
         "instructions": instructions
     }
     if aliases is not None:
         recipe["aliases"] = aliases
 
     return recipe_id, recipe
-
-
-
-
 
 
 def main():
@@ -71,22 +68,21 @@ def main():
         match choice:
             case 1:
                 recipe_name = input("Enter recipe name: ")
-                #TODO: ajout normalisation de recipe_name à recipe_id
                 try:
-                    result = recipe_search(recipes, recipe_name)
+                    recipe_id = recipe_search(recipes, recipe_name)
                 except ValueError:
                     create = input(f"Recipe for {recipe_name} not found. Would you like to create it? (Y/N): ")
                     if create.strip().upper() == "Y":
-                        create_recipe(recipes, recipe_id, recipe)
+                        create_recipe(recipes)
                 else:
-                    view_recipe(recipes, recipe_id)
+                    pprint.pp(view_recipe(recipes, recipe_id))
             case 2:
                 recipe_id, recipe = create_recipe(recipes)
                 add_recipe_to_cookbook(recipes, recipe_id, recipe)
                 save_recipe(RECIPES_FILE, recipes)
             case 3:
                 to_modify_name = input("Enter the name of the recipe you wish to modify: ")
-                #TODO = récupérer le recipe_id de to_modify_name
+                recipe_id = recipe_name_to_id(to_modify_name)
                 print("1. Name")
                 print("2. Aliases")
                 print("3. Ingredients")
@@ -111,7 +107,9 @@ def main():
                         modify_recipe(recipes, recipe_id, "instructions", new_instructions)
                         save_recipe(RECIPES_FILE, recipes)
             case 4:
-                del_choice = input(f"Are you sure you want to delete {recipe_name}? (Y/N): ").strip().upper()
+                to_delete_name = input("Enter the name of the recipe you wish to delete: ")
+                recipe_id = recipe_name_to_id(to_delete_name)
+                del_choice = input(f"Are you sure you want to delete {to_delete_name}? (Y/N): ").strip().upper()
                 if del_choice == "Y":
                     delete_recipe(recipes, recipe_id)
                     save_recipe(RECIPES_FILE, recipes)

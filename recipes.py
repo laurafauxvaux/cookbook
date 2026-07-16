@@ -22,7 +22,7 @@ def load_recipes(filepath:str)->dict:
 
 def recipe_search(recipes:dict[str, Recipe], recipe_name:str)->str:
         searched = recipe_name.lower()
-        for recipe_d, recipe in recipes.items():
+        for recipe_id, recipe in recipes.items():
             if (searched == recipe["en"].lower()
                 or any(searched == alias.lower() for alias in recipe["aliases"])
                 ):
