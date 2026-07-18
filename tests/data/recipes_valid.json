@@ -1,0 +1,13 @@
+{
+    "bread": {
+        "en": "bread",
+        "aliases": ["loaf"],
+        "ingredients": [],
+        "instructions": []
+    },
+    "omelette": {
+        "en": "omelette",
+        "ingredients": [],
+        "instructions": []
+    }
+}

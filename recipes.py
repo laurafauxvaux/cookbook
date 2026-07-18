@@ -24,7 +24,7 @@ def recipe_search(recipes:dict[str, Recipe], recipe_name:str)->str:
         searched = recipe_name.lower()
         for recipe_id, recipe in recipes.items():
             if (searched == recipe["en"].lower()
-                or any(searched == alias.lower() for alias in recipe["aliases"])
+                or any(searched == alias.lower() for alias in recipe.get("aliases", []))
                 ):
                     return recipe_id
         raise ValueError
@@ -38,7 +38,7 @@ def recipe_exists(recipes:dict[str, Recipe], recipe_name:str)->bool:
         searched = recipe_name.lower()
         for recipe in recipes.values():
             if (searched == recipe["en"].lower()
-                or any(searched == alias.lower() for alias in recipe["aliases"])
+                or any(searched == alias.lower() for alias in recipe.get("aliases", []))
                 ):
                     return True
         return False
