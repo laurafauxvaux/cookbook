@@ -1,0 +1,20 @@
+{
+    "banana_bread": {
+        "en": "banana bread",
+        "ingredients": [],
+        "instructions": []
+    },
+    "bread": {
+        "aliases": [
+            "loaf"
+        ],
+        "en": "bread",
+        "ingredients": [],
+        "instructions": []
+    },
+    "omelette": {
+        "en": "omelette",
+        "ingredients": [],
+        "instructions": []
+    }
+}

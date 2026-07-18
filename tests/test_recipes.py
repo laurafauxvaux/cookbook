@@ -1,6 +1,7 @@
 import json
 import unittest
-from config import RECIPES_VALID_TEST_FILE, RECIPES_INVALID_TEST_FILE, RECIPES_EMPTY_TEST_FILE
+import shutil
+from config import RECIPES_VALID_TEST_FILE, RECIPES_INVALID_TEST_FILE, RECIPES_EMPTY_TEST_FILE, RECIPES_SAVE_TEST_FILE
 from recipes import (
     load_recipes,
     save_recipe,
@@ -12,7 +13,7 @@ from recipes import (
     delete_recipe
 )
 
-class TestRecipes(unittest.TestCase):
+class TestRecipes(unittest.TestCase):    
 
     def test_load_recipes_empty(self):
             recipes = load_recipes(RECIPES_EMPTY_TEST_FILE)
@@ -75,7 +76,7 @@ class TestRecipes(unittest.TestCase):
             recipes = load_recipes(RECIPES_VALID_TEST_FILE)
             self.assertTrue(recipe_exists(recipes, "loaf"))
     
-    def add_recipe_to_cookbook(self):
+    def test_add_recipe_to_cookbook(self):
             recipes = load_recipes(RECIPES_VALID_TEST_FILE)
             new_recipe = {
                 "en": "banana bread",
@@ -86,3 +87,34 @@ class TestRecipes(unittest.TestCase):
             add_recipe_to_cookbook(recipes, recipe_id, new_recipe)
             self.assertIn(recipe_id, recipes)
             self.assertEqual(recipes[recipe_id], new_recipe)
+
+    def test_save_recipe(self):
+        shutil.copy(RECIPES_VALID_TEST_FILE,RECIPES_SAVE_TEST_FILE)
+        temp_recipes = load_recipes(RECIPES_SAVE_TEST_FILE)
+        new_recipe = {
+                "en": "banana bread",
+                "ingredients": [],
+                "instructions": []
+            }
+        recipe_id = "banana_bread"
+        add_recipe_to_cookbook(temp_recipes, recipe_id, new_recipe)
+        expected = temp_recipes
+        save_recipe(RECIPES_SAVE_TEST_FILE, temp_recipes)
+        saved_recipes = load_recipes(RECIPES_SAVE_TEST_FILE)
+        self.assertEqual(expected, saved_recipes)
+
+    def test_modify_recipe(self):
+        shutil.copy(RECIPES_VALID_TEST_FILE,RECIPES_SAVE_TEST_FILE)
+        recipes = load_recipes(RECIPES_SAVE_TEST_FILE)
+        modify_recipe(recipes, "omelette", "aliases", ["eggs"])
+        save_recipe(RECIPES_SAVE_TEST_FILE, recipes)
+        modified_recipes = load_recipes(RECIPES_SAVE_TEST_FILE)
+        self.assertEqual(modified_recipes["omelette"]["aliases"], ["eggs"])
+
+    def test_delete_recipe(self):
+        shutil.copy(RECIPES_VALID_TEST_FILE,RECIPES_SAVE_TEST_FILE)
+        recipes = load_recipes(RECIPES_SAVE_TEST_FILE)
+        delete_recipe(recipes, "bread")
+        save_recipe(RECIPES_SAVE_TEST_FILE, recipes)
+        modified_recipes = load_recipes(RECIPES_SAVE_TEST_FILE)
+        self.assertNotIn("bread", modified_recipes)

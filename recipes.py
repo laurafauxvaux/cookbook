@@ -2,7 +2,7 @@ import json
 from typing import TypedDict, NotRequired
 from config import RECIPES_FILE
 
-class RecipeIngredients(TypedDict):
+class RecipeIngredient(TypedDict):
      ingredient: str
      quantity: float
      unit: str
@@ -10,7 +10,7 @@ class RecipeIngredients(TypedDict):
 class Recipe(TypedDict):
     en: str
     aliases: NotRequired[list[str]]
-    ingredients: list[RecipeIngredients]
+    ingredients: list[RecipeIngredient]
     instructions: list[str]
 
 
@@ -53,7 +53,7 @@ def save_recipe(filepath:str, recipes:dict[str, Recipe]):
          json.dump(recipes, file, indent=4, sort_keys=True)
     
     
-def modify_recipe(recipes:dict[str, Recipe], recipe_id:str, field:str, value:str):
+def modify_recipe(recipes:dict[str, Recipe], recipe_id:str, field:str, value:str | list[str] | list[RecipeIngredient]):
      recipes[recipe_id][field] = value
           
 
