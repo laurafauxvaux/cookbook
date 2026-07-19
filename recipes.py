@@ -4,7 +4,6 @@ from typing import TypedDict, NotRequired
 class RecipeIngredient(TypedDict):
      ingredient: str
      quantity: float
-     unit: str
 
 class Recipe(TypedDict):
     en: str
