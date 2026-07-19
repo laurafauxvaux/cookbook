@@ -1,6 +1,5 @@
 import json
 from typing import TypedDict, NotRequired
-from config import RECIPES_FILE
 
 class RecipeIngredient(TypedDict):
      ingredient: str
@@ -14,7 +13,7 @@ class Recipe(TypedDict):
     instructions: list[str]
 
 
-def load_recipes(filepath:str)->dict:
+def load_recipes(filepath:str)->dict[str, Recipe]:
     with open(filepath, "r") as file:
         recipes = json.load(file)
     return recipes
