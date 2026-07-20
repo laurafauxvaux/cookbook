@@ -11,3 +11,7 @@ RECIPES_VALID_TEST_FILE = TEST_DATA_DIR / "recipes_valid.json"
 RECIPES_INVALID_TEST_FILE = TEST_DATA_DIR / "recipes_invalid.json"
 RECIPES_EMPTY_TEST_FILE = TEST_DATA_DIR / "recipes_empty.json"
 RECIPES_SAVE_TEST_FILE = TEST_DATA_DIR / "recipes_temp_test.json"
+
+INGREDIENTS_VALID_TEST_FILE = TEST_DATA_DIR / "ingredients_valid.json"
+INGREDIENTS_INVALID_TEST_FILE = TEST_DATA_DIR / "ingredients_invalid.json"
+INGREDIENTS_SAVE_TEST_FILE = TEST_DATA_DIR / "ingredients_temp_test.json"

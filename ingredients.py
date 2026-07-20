@@ -33,7 +33,7 @@ def add_ingredient_to_catalog(ingredients_catalog:dict[str, Ingredient], ingredi
 
 def save_ingredients(filepath:str, ingredients_catalog:dict[str, Ingredient]):
     with open(filepath, "w") as file:
-         json.dump(ingredients_catalog, file, indent=4)
+         json.dump(ingredients_catalog, file, indent=4, sort_keys=True)
 
 def modify_ingredient(ingredients_catalog:dict[str, Ingredient], ingredient_id:str, field:str, value:str | list[str] | bool):
      ingredients_catalog[ingredient_id][field] = value

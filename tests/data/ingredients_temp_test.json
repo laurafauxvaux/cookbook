@@ -1,0 +1,30 @@
+{
+    "eggs": {
+        "aliases": [
+            "egg"
+        ],
+        "base_unit": "unit",
+        "en": "Eggs",
+        "is_vegan": false
+    },
+    "flour": {
+        "aliases": [],
+        "base_unit": "g",
+        "en": "Flour",
+        "is_vegan": true
+    },
+    "milk": {
+        "aliases": [],
+        "base_unit": "ml",
+        "en": "Milk",
+        "is_vegan": false
+    },
+    "sugar": {
+        "aliases": [
+            "sweetener"
+        ],
+        "base_unit": "g",
+        "en": "Sugar",
+        "is_vegan": true
+    }
+}

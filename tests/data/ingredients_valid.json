@@ -1,0 +1,11 @@
+{
+    "eggs": {
+        "en": "Eggs", "aliases": ["egg"], "base_unit": "unit", "is_vegan": false
+    }, 
+    "flour": {
+        "en": "Flour", "aliases": [], "base_unit": "g", "is_vegan": true
+    }, 
+    "milk": {
+        "en": "Milk", "aliases": [], "base_unit": "ml", "is_vegan": false
+    }
+}
