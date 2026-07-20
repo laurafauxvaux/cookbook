@@ -24,7 +24,7 @@ from recipes import (
     )
 
 
-def create_recipe(recipes, ingredients_catalog):
+def create_recipe(recipes, ingredients_catalog) -> tuple[str, Recipe]:
     recipe_name = input("Enter a new recipe name: ")
     recipe_id = name_to_id(recipe_name)
     if recipe_exists(recipes, recipe_name):
@@ -60,18 +60,18 @@ def create_recipe(recipes, ingredients_catalog):
 
 
 def collect_recipe_ingredients(ingredients_catalog:dict[str, Ingredient])->list[RecipeIngredient]:
-    entered_ingredients = input("Enter ingredients. Please separate steps by semi-colons: ").strip().split(";")
-    known_ingredients: list[str] = []
+    entered_ingredients = input("Enter ingredients. Please separate by semi-colons: ").strip().split(";")
+    entered_ingredients_with_quantities: list[tuple[str, float]] = []
     unknown_ingredient: list[str] = []
     recipe_ingredients: list[RecipeIngredient] = []
 
     for ingredient in entered_ingredients:
         ingredient = ingredient.strip()
+        quantity = float(input(f"Enter quantity for {ingredient}: "))
         ingredient_id = get_ingredient_id_from_name(ingredients_catalog, ingredient)
+        entered_ingredients_with_quantities.append((ingredient, quantity))
         if ingredient_id is None:
             unknown_ingredient.append(ingredient)
-        else:
-           known_ingredients.append(ingredient_id)
     
     if unknown_ingredient:
         create_ingredient_choice = input(
@@ -83,14 +83,14 @@ def collect_recipe_ingredients(ingredients_catalog:dict[str, Ingredient])->list[
             for ingredient in unknown_ingredient:
                 ingredient_id, ingredient = create_ingredient(ingredients_catalog, ingredient_name=ingredient)
                 add_ingredient_to_catalog(ingredients_catalog, ingredient_id, ingredient)
-                if ingredient_id not in known_ingredients:
-                    known_ingredients.append(ingredient_id)
             save_ingredients(INGREDIENTS_FILE, ingredients_catalog)
         else:
             raise ValueError("Cannot save recipe without creating unknown ingredients.")
     
-    for ingredient_id in known_ingredients:
-        quantity = float(input(f"Enter quantity for {ingredient_id}: "))
+    for ingredient_name, quantity in entered_ingredients_with_quantities:
+        ingredient_id = get_ingredient_id_from_name(ingredients_catalog, ingredient_name)
+        if ingredient_id is None:
+            raise ValueError(f"Ingredient '{ingredient_name}' could not be resolved.")
         recipe_ingredient: RecipeIngredient = {
             "ingredient": ingredient_id,
             "quantity": quantity
@@ -100,9 +100,7 @@ def collect_recipe_ingredients(ingredients_catalog:dict[str, Ingredient])->list[
     return recipe_ingredients
 
 
-def create_ingredient(ingredients_catalog:dict[str, Ingredient], ingredient_name:str | None = None)->tuple[str, Ingredient]:
-    if ingredient_name is None:
-        ingredient_name = input("Enter a new ingredient name: ")
+def create_ingredient(ingredients_catalog:dict[str, Ingredient], ingredient_name:str)->tuple[str, Ingredient]:
     ingredient_id = name_to_id(ingredient_name)
     if ingredient_exists(ingredients_catalog, ingredient_id):
          raise ValueError(
@@ -134,7 +132,7 @@ def create_ingredient(ingredients_catalog:dict[str, Ingredient], ingredient_name
         "is_vegan": is_vegan
     }
     if aliases is not None:
-        ingredient["aliases"] = aliases
+        ingredient["aliases"] = [alias.strip() for alias in aliases]
 
     return ingredient_id, ingredient
 
