@@ -7,10 +7,8 @@ from ingredients import (
     ingredient_exists,
     get_ingredient_id_from_name,
     load_ingredients,
-    save_ingredient,
-    modify_ingredient,
-    delete_ingredient,
-    save_ingredients)
+    save_ingredients
+    )
 from normalize import name_to_id
 from recipes import (
     Recipe,
@@ -22,7 +20,8 @@ from recipes import (
     recipe_exists,
     save_recipe,
     modify_recipe,
-    delete_recipe)
+    delete_recipe
+    )
 
 
 def create_recipe(recipes, ingredients_catalog):
@@ -58,6 +57,7 @@ def create_recipe(recipes, ingredients_catalog):
     
         
     return recipe_id, recipe
+
 
 def collect_recipe_ingredients(ingredients_catalog:dict[str, Ingredient])->list[RecipeIngredient]:
     entered_ingredients = input("Enter ingredients. Please separate steps by semi-colons: ").strip().split(";")
@@ -99,6 +99,7 @@ def collect_recipe_ingredients(ingredients_catalog:dict[str, Ingredient])->list[
 
     return recipe_ingredients
 
+
 def create_ingredient(ingredients_catalog:dict[str, Ingredient], ingredient_name:str | None = None)->tuple[str, Ingredient]:
     if ingredient_name is None:
         ingredient_name = input("Enter a new ingredient name: ")
@@ -136,7 +137,6 @@ def create_ingredient(ingredients_catalog:dict[str, Ingredient], ingredient_name
         ingredient["aliases"] = aliases
 
     return ingredient_id, ingredient
-
 
 
 def main():
@@ -181,7 +181,7 @@ def main():
                 save_recipe(RECIPES_FILE, recipes)
             case 3:
                 to_modify_name = input("Enter the name of the recipe you wish to modify: ")
-                recipe_id = name_to_id(to_modify_name)
+                recipe_id = recipe_search(recipes, to_modify_name)
                 print("1. Name")
                 print("2. Aliases")
                 print("3. Ingredients")
@@ -198,7 +198,9 @@ def main():
                         modify_recipe(recipes, recipe_id, "aliases", new_aliases)
                         save_recipe(RECIPES_FILE, recipes)
                     case 3:
-                        #TODO
+                        new_ingredients = collect_recipe_ingredients(ingredients_catalog)
+                        modify_recipe(recipes, recipe_id, "ingredients", new_ingredients)
+                        save_recipe(RECIPES_FILE, recipes)
                     case 4:
                         new_instructions = input(
                             "Enter new instructions. Please separate steps by semi-colons (e.g Melt butter;Add flour): "
