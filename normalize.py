@@ -1,22 +1,22 @@
-def recipe_name_to_id(recipe_name):
-    to_normalize = recipe_name.strip().lower()
+def name_to_id(name):
+    to_normalize = name.strip().lower()
 
-    recipe_id = ""
+    id = ""
 
     for chara in to_normalize:
         if chara.isalnum():
-            recipe_id += chara
-        elif (
-            chara == " "
-            or chara == "-"
-            or chara == "_"
-            ):
-            if recipe_id and recipe_id[-1] == "_":
-                continue
-            recipe_id += "_"
+           id += chara
+        if id:
+            if (
+                chara == " "
+                or chara == "-"
+                or chara == "_"
+                ):
+                if id[-1] == "_":
+                    continue
+                id += "_"
         
+    return id.rstrip("_")
 
-    return recipe_id.rstrip("_")
-        
     
     
