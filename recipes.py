@@ -8,6 +8,7 @@ class RecipeIngredient(TypedDict):
 class Recipe(TypedDict):
     en: str
     aliases: NotRequired[list[str]]
+    servings: NotRequired[int]
     ingredients: list[RecipeIngredient]
     instructions: list[str]
 

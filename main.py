@@ -24,6 +24,8 @@ from recipes import (
     search_recipes_by_ingredients
     )
 
+from calculations import scale_recipe, convert_metric_to_us_customary
+
 
 def create_recipe(recipes, ingredients_catalog) -> tuple[str, Recipe]:
     recipe_name = input("Enter a new recipe name: ")
@@ -40,7 +42,8 @@ def create_recipe(recipes, ingredients_catalog) -> tuple[str, Recipe]:
         aliases = input(
             "Enter an alias. If several, separate by commas: "
             ).strip().split(",")
-
+        
+    servings = input("Number of servings (leave blank if not applicable): ").strip()
     instructions = input(
         "Enter instructions. Please separate steps by semi-colons (e.g Melt butter;Add flour): "
         ).strip().split(";")
@@ -55,7 +58,12 @@ def create_recipe(recipes, ingredients_catalog) -> tuple[str, Recipe]:
 
     if aliases is not None:
         recipe["aliases"] = aliases
-    
+    if servings:
+        servings = int(servings)
+        if servings > 0:
+            recipe["servings"] = servings
+        else:
+            print("Invalid number, servings won't be saved.")
         
     return recipe_id, recipe
 
@@ -137,6 +145,7 @@ def create_ingredient(ingredients_catalog:dict[str, Ingredient], ingredient_name
 
     return ingredient_id, ingredient
 
+
 def search_recipe_from_user_ingredients(recipes, ingredients_catalog):
     ingredients_research = input(
         "Enter your ingredients. Please separate by commas: "
@@ -197,21 +206,52 @@ def main():
         print("5. Delete recipe")
         print("0. Leave")
 
+        choices = (0, 1, 2, 3, 4, 5)
         choice = int(input("Choice: "))
-
+        if choice not in choices:
+            print("Please enter a valid choice number.")
         match choice:
             case 1:
                 recipe_name = input("Enter recipe name: ")
                 try:
                     recipe_id = recipe_search(recipes, recipe_name)
                 except ValueError:
-                    create = input(f"Recipe for {recipe_name} not found. Would you like to create it? (Y/N): ")
+                    create = input(
+                        f"Recipe for {recipe_name} not found. Would you like to create it? (Y/N): "
+                        ).strip().upper()
                     if create not in ("Y", "N"):
                         raise ValueError("Invalid input. Please enter 'Y' or 'N'.")
                     if create.strip().upper() == "Y":
                         recipe_id, recipe = create_recipe(recipes, ingredients_catalog)
                 else:
                     pprint.pp(view_recipe(recipes, recipe_id))
+
+                    if "servings" in recipes[recipe_id]:
+
+                        while True:
+                            change_servings = input(
+                                "Calculate for another number of servings? (Y/N): "
+                                ).strip().upper()
+                            if change_servings not in ("Y", "N"):
+                                print("Please enter Y or N.")
+                                continue
+                            if change_servings == "N":
+                                break
+                            
+                            try:
+                                chosen_servings = int(input("Enter the number of servings: "))
+                            except ValueError:
+                                print("Please enter a number.")
+                                continue
+                            else:
+                                if chosen_servings <= 0:
+                                    print("Please enter a number greater than 0.")
+                                    continue
+                                else:
+                                    pprint.pp(
+                                        scale_recipe(recipes[recipe_id], chosen_servings)
+                                    )
+                                break
             case 2:
                 search_recipe_from_user_ingredients(recipes, ingredients_catalog)
             case 3:
