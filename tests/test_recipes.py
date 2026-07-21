@@ -10,7 +10,8 @@ from recipes import (
     recipe_exists,
     add_recipe_to_cookbook,
     modify_recipe,
-    delete_recipe
+    delete_recipe,
+    search_recipes_by_ingredients
 )
 
 class TestRecipes(unittest.TestCase):    
@@ -118,3 +119,24 @@ class TestRecipes(unittest.TestCase):
         save_recipe(RECIPES_SAVE_TEST_FILE, recipes)
         modified_recipes = load_recipes(RECIPES_SAVE_TEST_FILE)
         self.assertNotIn("bread", modified_recipes)
+        
+    def test_search_recipes_by_ingredients(self):
+        recipes_catalog = {
+            "bread": {
+                "en": "Bread",
+                "ingredients": [
+                            {"ingredient": "flour", "quantity": 250.0},
+                            {"ingredient": "water", "quantity": 100.0},
+                    ],
+                "instructions": [],
+            },
+            "omelette": {
+                "en": "Omelette",
+                "ingredients": [
+                    {"ingredient": "eggs", "quantity": 2.0},
+                ],
+                "instructions": [],
+            },
+        }
+        result = search_recipes_by_ingredients(recipes_catalog, ["flour", "water"])
+        self.assertEqual(result, ["bread"])

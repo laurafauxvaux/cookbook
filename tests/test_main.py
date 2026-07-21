@@ -4,6 +4,7 @@ from main import (
     create_recipe,
     create_ingredient,
     collect_recipe_ingredients,
+    search_recipe_from_user_ingredients
 )
 
 class TestRecipes(unittest.TestCase):
@@ -151,13 +152,72 @@ class TestRecipes(unittest.TestCase):
 
     def test_error_create_recipe_duplicate_id(self):
         recipes_catalog = {
-            "bread": 
-            {"en": "Bread", 
-             "ingredients": [], 
-             "instructions": []
+            "bread":{
+            "en": "Bread", 
+            "ingredients": [], 
+            "instructions": []
              }
         }
         with patch("builtins.input", side_effect=["Bread"]):
             with self.assertRaises(ValueError) as context:
                 create_recipe(recipes_catalog, {})
         self.assertIn(f"bread already in the cookbook.", str(context.exception))
+    
+    def search_recipe_by_user_ingredients_available(self):
+        recipes = {
+            "bread":{
+                "en": "Bread", 
+                "ingredients": [], 
+                "instructions": []
+            },
+            "omelette":{
+                "en": 
+                "Omelette", 
+                "ingredients": [], 
+                "instructions": []
+            },
+        }
+        ingredients_catalog = {}
+        with patch(
+            "builtins.input", side_effect=["flour, water", "1"],
+                   ), patch(
+                       "main.get_ingredient_id_from_name",side_effect=["flour", "water"],
+              ), patch(
+                  "main.search_recipe_by_ingredients", return_value=["bread", "omelette"],
+              ), patch(
+                  "main.view_recipe",
+              ) as mock_view_recipe:
+            mock_view_recipe.assert_called_once_with(recipes, "bread")
+    
+    def search_recipe_by_user_ingredients_available(self):
+        recipes = {
+            "bread":{
+                "en": "Bread", 
+                "ingredients": [], 
+                "instructions": []
+            },
+            "omelette":{
+                "en": 
+                "Omelette", 
+                "ingredients": [], 
+                "instructions": []
+            },
+        }
+        ingredients_catalog = {}
+        with patch(
+            "builtins.input",
+            side_effect=["salt", "N"],
+        ), patch(
+            "main.get_ingredient_id_from_name",
+            return_value=None,
+        ), patch(
+            "main.create_ingredient",
+        ) as mock_create_ingredient, patch(
+            "main.search_recipes_by_ingredients",
+        ) as mock_search, patch(
+            "main.view_recipe",
+        ) as mock_view_recipe:
+            search_recipe_from_user_ingredients(recipes, ingredients_catalog)
+        mock_create_ingredient.assert_not_called()
+        mock_search.assert_not_called()
+        mock_view_recipe.assert_not_called()
