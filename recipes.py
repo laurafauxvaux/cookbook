@@ -57,3 +57,10 @@ def modify_recipe(recipes:dict[str, Recipe], recipe_id:str, field:str, value:str
 
 def delete_recipe(recipes:dict[str, Recipe], recipe_id:str):
     del recipes[recipe_id]
+
+def search_recipes_by_ingredients(recipes:dict[str, Recipe], ingredients_ids:list[str])->list[Recipe]:
+    matching_recipe_ids = []
+    for recipe_id, recipe in recipes.items():
+        if all(recipe_ingredient["ingredient"] in ingredients_ids for recipe_ingredient in recipe["ingredients"]):
+            matching_recipe_ids.append(recipe_id)
+    return matching_recipe_ids

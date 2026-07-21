@@ -20,7 +20,8 @@ from recipes import (
     recipe_exists,
     save_recipe,
     modify_recipe,
-    delete_recipe
+    delete_recipe,
+    search_recipes_by_ingredients
     )
 
 
@@ -136,14 +137,51 @@ def create_ingredient(ingredients_catalog:dict[str, Ingredient], ingredient_name
 
     return ingredient_id, ingredient
 
+def search_recipe_from_user_ingredients(recipes, ingredients_catalog):
+    ingredients_research = input(
+        "Enter your ingredients. Please separate by commas: "
+        ).strip().split(",")
+    ingredients_ids = []
+    for ingredient in ingredients_research:
+        ingredient  = ingredient.strip()
+        ingredient_id = get_ingredient_id_from_name(ingredients_catalog, ingredient)
+        if ingredient_id is None:
+            create_ingredient_choice = input(
+                f"Unknown ingredient: {ingredient}. Recipe can't be found. Create ingredient? (Y/N): "
+).strip().upper()
+            if create_ingredient_choice == "Y":
+                ingredient_id, new_ingredient = create_ingredient(ingredients_catalog, ingredient)
+                add_ingredient_to_catalog(ingredients_catalog, ingredient_id, new_ingredient)
+                save_ingredients(INGREDIENTS_FILE, ingredients_catalog)
+                print(f"Creation of {ingredient} complete, please restart your search.")
+                return
+            return
+        ingredients_ids.append(ingredient_id)
+    matching_recipe_ids = search_recipes_by_ingredients(recipes, ingredients_ids)
+    if not matching_recipe_ids:
+        print("No matching recipe found.")
+        return
+    for number, recipe_id in enumerate(matching_recipe_ids, start = 1):
+        print(f"{number}. {recipes[recipe_id]['en']}")
+    while True:
+        try:
+            recipe_number = int(input("Enter its number to see the recipe: "))
+        except ValueError:
+            print("Please enter a number.")
+            continue
+        if recipe_number <= 1 or recipe_number <= len(matching_recipe_ids):
+            break
+        print("Invalid number.")
+    recipe_choice = matching_recipe_ids[recipe_number-1]
+    pprint.pp(view_recipe(recipes, recipe_choice))
+
 
 def main():
     try:
         recipes = load_recipes(RECIPES_FILE)
     except FileNotFoundError:
         print("Error: recipes.json can't be found.")
-        return
-    
+        return  
     try:
         ingredients_catalog = load_ingredients(INGREDIENTS_FILE)
     except FileNotFoundError:
@@ -152,10 +190,11 @@ def main():
     
     while True:
         print("====MENU====")
-        print("1. Search recipe")
-        print("2. Create recipe")
-        print("3. Modify recipe")
-        print("4. Delete recipe")
+        print("1. Search recipe by name")
+        print("2. Search recipe by ingredients")
+        print("3. Create recipe")
+        print("4. Modify recipe")
+        print("5. Delete recipe")
         print("0. Leave")
 
         choice = int(input("Choice: "))
@@ -174,10 +213,12 @@ def main():
                 else:
                     pprint.pp(view_recipe(recipes, recipe_id))
             case 2:
+                search_recipe_from_user_ingredients(recipes, ingredients_catalog)
+            case 3:
                 recipe_id, recipe = create_recipe(recipes, ingredients_catalog)
                 add_recipe_to_cookbook(recipes, recipe_id, recipe)
                 save_recipe(RECIPES_FILE, recipes)
-            case 3:
+            case 4:
                 to_modify_name = input("Enter the name of the recipe you wish to modify: ")
                 recipe_id = recipe_search(recipes, to_modify_name)
                 print("1. Name")
@@ -205,7 +246,7 @@ def main():
                             ).strip().split(";")
                         modify_recipe(recipes, recipe_id, "instructions", new_instructions)
                         save_recipe(RECIPES_FILE, recipes)
-            case 4:
+            case 5:
                 to_delete_name = input("Enter the name of the recipe you wish to delete: ")
                 recipe_id = name_to_id(to_delete_name)
                 del_choice = input(f"Are you sure you want to delete {to_delete_name}? (Y/N): ").strip().upper()
