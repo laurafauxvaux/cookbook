@@ -1,6 +1,14 @@
 import unittest
 from unittest.mock import patch
-from interface import create_recipe, search_recipe_from_user_ingredients, create_ingredient, collect_recipe_ingredients
+from ingredients import Ingredient
+from recipes import Recipe
+from interface import (DisplayIngredient, create_recipe, 
+                       search_recipe_from_user_ingredients, 
+                       create_ingredient, 
+                       collect_recipe_ingredients,
+                       display_ingredients,
+                       format_recipe,
+                       )
 
 class TestInterface(unittest.TestCase):
 
@@ -219,4 +227,176 @@ class TestInterface(unittest.TestCase):
         mock_search.assert_not_called()
         mock_view_recipe.assert_not_called()
 
-    
+    def test_display_ingredients_no_conversion(self):
+        recipe: Recipe = {
+                "en": "Bread", 
+                "ingredients": [{
+                    "ingredient":"flour",
+                    "quantity":250.0,
+                },
+                {
+                    "ingredient": "water",
+                    "quantity": 100.0,
+                },
+            ],
+                "instructions": [],
+        }
+        ingredients_catalog: dict[str, Ingredient] = {
+                "flour": {
+                    "en": "Flour",
+                    "base_unit": "g",
+                    "is_vegan": True,
+                    },
+                "water": {
+                    "en": "Water",
+                    "base_unit": "ml",
+                    "is_vegan": True,
+                    },
+        }
+        result = display_ingredients(recipe, ingredients_catalog)
+        expected = [
+        {
+            "name": "Flour",
+            "quantity": 250.0,
+            "unit": "g",
+        },
+        {
+            "name": "Water",
+            "quantity": 100.0,
+            "unit": "ml",
+        },
+    ]
+        self.assertEqual(expected, result)
+
+
+    def test_display_ingredients_servings_conversion(self):
+        recipe: Recipe = {
+                "en": "Bread",
+                "servings": 4, 
+                "ingredients": [{
+                    "ingredient":"flour",
+                    "quantity":250.0,
+                },
+                {
+                    "ingredient": "water",
+                    "quantity": 100.0,
+                },
+                ],
+                "instructions": []
+            }
+        ingredients_catalog: dict[str, Ingredient] = {
+                "flour": {
+                    "en": "Flour",
+                    "base_unit": "g",
+                    "is_vegan": True,
+                    },
+                "water": {
+                    "en": "Water",
+                    "base_unit": "ml",
+                    "is_vegan": True,
+                    },
+        }
+        result = display_ingredients(
+            recipe, 
+            ingredients_catalog, 
+            target_servings=2)
+        expected = [
+        {
+            "name": "Flour",
+            "quantity": 125.0,
+            "unit": "g",
+        },
+        {
+            "name": "Water",
+            "quantity": 50.0,
+            "unit": "ml",
+        },
+    ]
+        self.assertEqual(expected, result)
+
+
+    def test_display_ingredients_us_units_conversion(self):
+        recipe: Recipe = {
+                "en": "Bread", 
+                "ingredients": [{
+                    "ingredient":"flour",
+                    "quantity":250.0,
+                },
+                {
+                    "ingredient": "water",
+                    "quantity": 100.0,
+                },
+                ],
+                "instructions": []
+            }
+        ingredients_catalog: dict[str, Ingredient] = {
+                "flour": {
+                    "en": "Flour",
+                    "base_unit": "g",
+                    "is_vegan": True,
+                    },
+                "water": {
+                    "en": "Water",
+                    "base_unit": "ml",
+                    "is_vegan": True,
+                    },
+        }
+        result = display_ingredients(
+            recipe, 
+            ingredients_catalog,
+            use_us_customary=True
+            )
+        
+        self.assertEqual(result[0]["name"], "Flour")
+        self.assertEqual(result[0]["unit"], "oz")
+        self.assertAlmostEqual(result[0]["quantity"], 8.8185, places = 4)
+        self.assertEqual(result[1]["name"], "Water")
+        self.assertEqual(result[1]["unit"], "fl_oz")
+        self.assertAlmostEqual(result[1]["quantity"], 3.3814, places = 4)
+
+
+    def test_format_recipe(self):
+        recipe: Recipe = {
+            "en": "Bread",
+            "servings": 4, 
+            "ingredients": [{
+                "ingredient":"flour",
+                "quantity":250.0,
+            },
+            {
+                "ingredient": "water",
+                "quantity": 100.0,
+            },
+            ],
+            "instructions": [
+                "Mix the ingredients.",
+                "Bake the bread.",
+            ]
+        }
+        displayed_ingredients: DisplayIngredient = [
+            {
+            "name": "Flour",
+            "quantity": 250.0,
+            "unit": "g"
+            },
+            {
+            "name": "Water",
+            "quantity": 100.0,
+            "unit": "ml",
+            }
+        ]
+
+        expected = (
+            "Bread\n"
+            "Servings: 4\n"
+            "Ingredients:\n"
+            "- 250.0 g Flour\n"
+            "- 100.0 ml Water\n"
+            "\nInstructions:\n"
+            "1. Mix the ingredients.\n"
+            "2. Bake the bread.\n"
+        )
+
+        result = format_recipe(recipe, 4, displayed_ingredients)
+
+        self.assertEqual(expected, result)

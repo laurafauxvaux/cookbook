@@ -1,30 +1,23 @@
 import pprint
 from config import RECIPES_FILE, INGREDIENTS_FILE
-from ingredients import (
-    VALID_UNITS, 
-    Ingredient,
-    add_ingredient_to_catalog,
-    ingredient_exists,
-    get_ingredient_id_from_name,
-    load_ingredients,
-    save_ingredients
-    )
+from ingredients import load_ingredients 
 from normalize import name_to_id
 from recipes import (
-    Recipe,
-    RecipeIngredient, 
     load_recipes, 
     recipe_search,
     view_recipe,
     add_recipe_to_cookbook,
-    recipe_exists,
     save_recipe,
     modify_recipe,
     delete_recipe,
-    search_recipes_by_ingredients
     )
-from calculations import scale_recipe, convert_metric_to_us_customary
-from interface import create_recipe, collect_recipe_ingredients, search_recipe_from_user_ingredients
+from interface import (
+                    create_recipe, 
+                    collect_recipe_ingredients, 
+                    format_recipe, 
+                    search_recipe_from_user_ingredients, 
+                    display_ingredients,
+                    )
 
 def main():
     try:
@@ -51,6 +44,7 @@ def main():
         choice = int(input("Choice: "))
         if choice not in choices:
             print("Please enter a valid choice number.")
+
         match choice:
             case 1:
                 recipe_name = input("Enter recipe name: ")
@@ -67,7 +61,16 @@ def main():
                         add_recipe_to_cookbook(recipes, recipe_id, recipe)
                         save_recipe(RECIPES_FILE, recipes)
                 else:
-                    pprint.pp(view_recipe(recipes, recipe_id))
+                    recipe = view_recipe(recipes, recipe_id)
+                    number_of_servings = recipe.get("servings")
+                    display_ingredients = display_ingredients(recipe, ingredients_catalog)
+                    pprint.pp(
+                        format_recipe(
+                            recipe,
+                            number_of_servings,
+                            display_ingredients
+                        )
+                    )
 
                     if "servings" in recipes[recipe_id]:
 
@@ -90,17 +93,30 @@ def main():
                                 if chosen_servings <= 0:
                                     print("Please enter a number greater than 0.")
                                     continue
-                                else:
-                                    pprint.pp(
-                                        scale_recipe(recipes[recipe_id], chosen_servings)
+
+                                displayed_ingredients = display_ingredients(
+                                    recipe,
+                                    ingredients_catalog,
+                                    chosen_servings,
+                                )
+
+                                pprint.pp(
+                                    format_recipe(
+                                        recipe,
+                                        chosen_servings,
+                                        display_ingredients,
                                     )
+                                )
                                 break
+
             case 2:
                 search_recipe_from_user_ingredients(recipes, ingredients_catalog)
+
             case 3:
                 recipe_id, recipe = create_recipe(recipes, ingredients_catalog)
                 add_recipe_to_cookbook(recipes, recipe_id, recipe)
                 save_recipe(RECIPES_FILE, recipes)
+
             case 4:
                 to_modify_name = input("Enter the name of the recipe you wish to modify: ")
                 recipe_id = recipe_search(recipes, to_modify_name)
@@ -129,6 +145,7 @@ def main():
                             ).strip().split(";")
                         modify_recipe(recipes, recipe_id, "instructions", new_instructions)
                         save_recipe(RECIPES_FILE, recipes)
+
             case 5:
                 to_delete_name = input("Enter the name of the recipe you wish to delete: ")
                 recipe_id = name_to_id(to_delete_name)
@@ -138,8 +155,10 @@ def main():
                 if del_choice == "Y":
                     delete_recipe(recipes, recipe_id)
                     save_recipe(RECIPES_FILE, recipes)
+
             case 0:
                 break
+
             case _:
                 print("Invalid choice, please enter a number from the menu list.")
 

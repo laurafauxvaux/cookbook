@@ -2,8 +2,8 @@ import json
 from typing import TypedDict, NotRequired
 
 class RecipeIngredient(TypedDict):
-     ingredient: str
-     quantity: float
+    ingredient: str
+    quantity: float
 
 class Recipe(TypedDict):
     en: str

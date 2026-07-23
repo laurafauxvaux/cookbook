@@ -1,4 +1,5 @@
 import pprint
+from typing import TypedDict
 from config import INGREDIENTS_FILE
 from ingredients import (
     VALID_UNITS, 
@@ -18,6 +19,58 @@ from recipes import (
     )
 
 from calculations import scale_recipe, convert_metric_to_us_customary
+
+class DisplayIngredient(TypedDict):
+    name:str
+    quantity:float
+    unit:str  
+
+def display_ingredients(recipe:Recipe,
+                        ingredients_catalog:dict[str, Ingredient], 
+                        target_servings: int | None = None, 
+                        use_us_customary: bool = False,
+                        )->list[DisplayIngredient]:
+    displayed_ingredients: list[DisplayIngredient] = []
+
+    if target_servings is not None:
+        recipe_ingredients = scale_recipe(recipe, target_servings)
+    else:
+        recipe_ingredients = recipe["ingredients"]
+
+    for recipe_ingredient in recipe_ingredients:
+        ingredient_id = recipe_ingredient["ingredient"]
+        ingredient_data = ingredients_catalog[ingredient_id] 
+        quantity = recipe_ingredient["quantity"]
+        unit = ingredient_data["base_unit"]
+        if use_us_customary:
+            quantity, unit = convert_metric_to_us_customary(ingredient_data, quantity)
+
+        displayed_ingredients.append({
+            "name": ingredient_data["en"],
+            "quantity": quantity,
+            "unit": unit,          
+        }) 
+
+    return displayed_ingredients
+
+def format_recipe(recipe:Recipe, number_of_servings:int | None, displayed_ingredients:list[DisplayIngredient]) -> str:
+    result = (
+        f"{recipe['en']}\n"
+        f"Servings: {number_of_servings}\n"
+        f"Ingredients:\n"
+    )
+    for ingredient in displayed_ingredients:
+        result += (
+            f"- {ingredient['quantity']} "
+            f"{ingredient['unit']} "
+            f"{ingredient['name']}\n"
+        )
+    result += "\nInstructions:\n"
+
+    for number, instruction in enumerate(recipe["instructions"], start = 1):
+        result += f"{number}. {instruction}\n"
+
+    return result
 
 
 def create_recipe(recipes, ingredients_catalog) -> tuple[str, Recipe]:
@@ -139,7 +192,7 @@ def create_ingredient(ingredients_catalog:dict[str, Ingredient], ingredient_name
     return ingredient_id, ingredient
 
 
-def search_recipe_from_user_ingredients(recipes, ingredients_catalog):
+def search_recipe_from_user_ingredients(recipes: dict[str, Recipe], ingredients_catalog: dict[str, Ingredient]) -> Recipe | None:
     ingredients_research = input(
         "Enter your ingredients. Please separate by commas: "
         ).strip().split(",")
@@ -175,4 +228,5 @@ def search_recipe_from_user_ingredients(recipes, ingredients_catalog):
             break
         print("Invalid number.")
     recipe_choice = matching_recipe_ids[recipe_number-1]
-    pprint.pp(view_recipe(recipes, recipe_choice))
+    return view_recipe(recipes, recipe_choice)
+   
