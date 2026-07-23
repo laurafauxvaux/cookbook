@@ -178,7 +178,7 @@ def search_recipe_from_user_ingredients(recipes, ingredients_catalog):
         except ValueError:
             print("Please enter a number.")
             continue
-        if recipe_number <= 1 or recipe_number <= len(matching_recipe_ids):
+        if 1 <= recipe_number <= len(matching_recipe_ids):
             break
         print("Invalid number.")
     recipe_choice = matching_recipe_ids[recipe_number-1]
@@ -221,8 +221,10 @@ def main():
                         ).strip().upper()
                     if create not in ("Y", "N"):
                         raise ValueError("Invalid input. Please enter 'Y' or 'N'.")
-                    if create.strip().upper() == "Y":
+                    if create == "Y":
                         recipe_id, recipe = create_recipe(recipes, ingredients_catalog)
+                        add_recipe_to_cookbook(recipes, recipe_id, recipe)
+                        save_recipe(RECIPES_FILE, recipes)
                 else:
                     pprint.pp(view_recipe(recipes, recipe_id))
 

@@ -128,7 +128,7 @@ class TestRecipes(unittest.TestCase):
         collected_ingredients = [
                 {"ingredient": "flour", "quantity": 250.0},
                 {"ingredient": "water", "quantity": 100.0}
-            ],
+            ]
         with patch(
             "main.collect_recipe_ingredients", 
             return_value=collected_ingredients,
@@ -136,8 +136,8 @@ class TestRecipes(unittest.TestCase):
             "builtins.input", 
             side_effect=["Bread",
                          "N",
-                         "Mix;Bake",
-                         ],
+                         "", #servings
+                         "Mix;Bake"],
             ):
                 recipe_id, recipe = create_recipe({}, {})
                 
@@ -163,7 +163,7 @@ class TestRecipes(unittest.TestCase):
                 create_recipe(recipes_catalog, {})
         self.assertIn(f"bread already in the cookbook.", str(context.exception))
     
-    def search_recipe_by_user_ingredients_available(self):
+    def test_search_recipe_by_user_ingredients_available(self):
         recipes = {
             "bread":{
                 "en": "Bread", 
@@ -183,13 +183,14 @@ class TestRecipes(unittest.TestCase):
                    ), patch(
                        "main.get_ingredient_id_from_name",side_effect=["flour", "water"],
               ), patch(
-                  "main.search_recipe_by_ingredients", return_value=["bread", "omelette"],
+                  "main.search_recipes_by_ingredients", return_value=["bread", "omelette"],
               ), patch(
                   "main.view_recipe",
               ) as mock_view_recipe:
-            mock_view_recipe.assert_called_once_with(recipes, "bread")
+            search_recipe_from_user_ingredients(recipes, ingredients_catalog)
+        mock_view_recipe.assert_called_once_with(recipes, "bread")
     
-    def search_recipe_by_user_ingredients_available(self):
+    def test_search_recipe_by_user_ingredients_unavailable(self):
         recipes = {
             "bread":{
                 "en": "Bread", 

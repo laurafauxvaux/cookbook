@@ -9,7 +9,7 @@ def scale_recipe(recipe: Recipe, number_of_servings:int)->list[RecipeIngredient]
     ratio = number_of_servings / recipe["servings"]
     for ingredient in recipe["ingredients"]:
         multiplied_ingredients.append({
-            "ingredient": ingredient,
+            "ingredient": ingredient["ingredient"],
             "quantity": ingredient["quantity"] * ratio,
             })
     return multiplied_ingredients

@@ -140,3 +140,4 @@ class TestRecipes(unittest.TestCase):
         }
         result = search_recipes_by_ingredients(recipes_catalog, ["flour", "water"])
         self.assertEqual(result, ["bread"])
+
