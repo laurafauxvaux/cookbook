@@ -1,26 +1,52 @@
 # Cookbook
 
-This project is my first personal project in my Boot.dev journey. In this cookbook, you can view recipes, enter your own or find a recipe based on the ingredients you already have. 
+This project is my first personal project in my Boot.dev journey. It is a command-line cookbook where users can view recipes, add their own, or find recipes based on the ingredients they already have.
 
 ## Features
 
-- [_] Browse recipes
-- [_] Add a recipe
-- [_] Modify a recipe (limited, see future improvements)
-- [_] Delete a recipe
-- [_] Find recipes based on available ingredients
-- [_] Add an ingredient
+- [x] Search and view recipes by name
+- [x] Add a recipe
+- [x] Modify a recipe (limited; see Future improvements)
+- [x] Delete a recipe
+- [x] Find recipes based on available ingredients
+- [x] Add missing ingredients during recipe creation
+- [x] Scale ingredient quantities for a different number of servings
+- [x] Display quantities in metric or US customary units
+- [x] Navigate through an interactive terminal menu
 
 ## Future improvements
 
-- [_] Ingredient substitutions
-- [_] User profiles (saved preferences and shopping lists)
-- [_] Metric/Imperial conversion
-- [_] French language support
-- [_] Build an alias lookup dictionary 
-- [_] Suggest existing ingredients during recipe creation
-- [_] Accent-insensitive search
-- [_] Search with typo tolerance
-- [_] Add, edit or remove individual aliases 
-- [_] Add, edit or remove individual ingredients 
-- [_] Display  recipes pages by page
+- [ ] Ingredient substitutions
+- [ ] User profiles with saved preferences and shopping lists
+- [ ] French language support
+- [ ] Build an alias lookup dictionary
+- [ ] Suggest existing ingredients during recipe creation
+- [ ] Accent-insensitive search
+- [ ] Search with typo tolerance
+- [ ] Add, edit, or remove individual aliases
+- [ ] Add, edit, or remove individual ingredients
+- [ ] Paginate recipe lists
+
+## Installation
+
+This project requires Python 3.13 or later and uses [uv](https://docs.astral.sh/uv/) for dependency management.
+
+Clone the repository:
+
+```bash
+git clone https://github.com/laurafauxvaux/cookbook
+cd cookbook
+```
+
+Install the required dependencies:
+```bash
+uv sync
+```
+
+## Usage
+
+Run the application from the project directory:
+```bash
+uv run python main.py
+```
+Use the arrow keys to navigate through the menu and press Enter to select an option.

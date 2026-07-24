@@ -1,3 +1,4 @@
+from simple_term_menu import TerminalMenu
 from config import RECIPES_FILE, INGREDIENTS_FILE
 from ingredients import load_ingredients 
 from normalize import name_to_id
@@ -30,20 +31,25 @@ def main():
     except FileNotFoundError:
         print("Error: ingredients.json can't be found.")
         return
-    
+    menu_options = [
+        "Search recipe by name",
+        "Search recipe by ingredients",
+        "Create recipe",
+        "Modify recipe",
+        "Delete recipe",
+        "Leave",
+    ]
+    menu_choices = [1, 2, 3, 4, 5, 0]
+    terminal_menu = TerminalMenu(
+        menu_options,
+        title="====MENU====",
+    )
     while True:
-        print("====MENU====")
-        print("1. Search recipe by name")
-        print("2. Search recipe by ingredients")
-        print("3. Create recipe")
-        print("4. Modify recipe")
-        print("5. Delete recipe")
-        print("0. Leave")
+        selected_index = terminal_menu.show()
+        if selected_index is None:
+            break
 
-        choices = (0, 1, 2, 3, 4, 5)
-        choice = int(input("Choice: "))
-        if choice not in choices:
-            print("Please enter a valid choice number.")
+        choice = menu_choices[selected_index]
 
         match choice:
             case 1:
