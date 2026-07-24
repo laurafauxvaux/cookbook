@@ -1,1 +1,65 @@
-{}
+{
+    "bread": {
+        "en": "Bread",
+        "ingredients": [
+            {
+                "ingredient": "flour",
+                "quantity": 400.0
+            },
+            {
+                "ingredient": "water",
+                "quantity": 300.0
+            },
+            {
+                "ingredient": "yeast",
+                "quantity": 7.0
+            },
+            {
+                "ingredient": "salt",
+                "quantity": 5.0
+            },
+            {
+                "ingredient": "sugar",
+                "quantity": 40.0
+            },
+            {
+                "ingredient": "oil",
+                "quantity": 40.0
+            }
+        ],
+        "instructions": [
+            "Heat up 25g of flour with 125ml of water and stir until creamy",
+            "prepare the yeast",
+            "in a large bowl, mix the remaining flour with the oil, the remaining water, the yeast and the previous mix of water and flour",
+            " knead for 10mins",
+            " add the sugar and salt",
+            " knead until combined",
+            " rest under a cloth for 90mins",
+            "put in final mold",
+            "rest for another 30mins",
+            "bake for 35mins in a 180\u00b0C oven"
+        ]
+    },
+    "simple_syrup": {
+        "aliases": [
+            "syrup"
+        ],
+        "en": "Simple syrup",
+        "ingredients": [
+            {
+                "ingredient": "water",
+                "quantity": 100.0
+            },
+            {
+                "ingredient": "sugar",
+                "quantity": 100.0
+            }
+        ],
+        "instructions": [
+            "Heat the water",
+            "Add sugar",
+            "Stir until dissolved"
+        ],
+        "servings": 4
+    }
+}

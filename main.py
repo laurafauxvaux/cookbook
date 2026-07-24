@@ -1,4 +1,3 @@
-import pprint
 from config import RECIPES_FILE, INGREDIENTS_FILE
 from ingredients import load_ingredients 
 from normalize import name_to_id
@@ -17,6 +16,7 @@ from interface import (
                     format_recipe, 
                     search_recipe_from_user_ingredients, 
                     display_ingredients,
+                    offer_serving_calculation,
                     )
 
 def main():
@@ -63,51 +63,22 @@ def main():
                 else:
                     recipe = view_recipe(recipes, recipe_id)
                     number_of_servings = recipe.get("servings")
-                    display_ingredients = display_ingredients(recipe, ingredients_catalog)
-                    pprint.pp(
+                    unit_choice = input("Use US customary units? (Y/N): ").strip().upper()
+                    if unit_choice not in ("Y", "N"):
+                         raise ValueError("Invalid input. Please enter 'Y' or 'N'.")
+                    use_us_customary = unit_choice == "Y"
+                    displayed_ingredients = display_ingredients(recipe, ingredients_catalog, use_us_customary=use_us_customary)
+                    print(
                         format_recipe(
                             recipe,
                             number_of_servings,
-                            display_ingredients
+                            displayed_ingredients
                         )
                     )
 
-                    if "servings" in recipes[recipe_id]:
+                    offer_serving_calculation(recipe, ingredients_catalog, use_us_customary)
 
-                        while True:
-                            change_servings = input(
-                                "Calculate for another number of servings? (Y/N): "
-                                ).strip().upper()
-                            if change_servings not in ("Y", "N"):
-                                print("Please enter Y or N.")
-                                continue
-                            if change_servings == "N":
-                                break
-                            
-                            try:
-                                chosen_servings = int(input("Enter the number of servings: "))
-                            except ValueError:
-                                print("Please enter a number.")
-                                continue
-                            else:
-                                if chosen_servings <= 0:
-                                    print("Please enter a number greater than 0.")
-                                    continue
-
-                                displayed_ingredients = display_ingredients(
-                                    recipe,
-                                    ingredients_catalog,
-                                    chosen_servings,
-                                )
-
-                                pprint.pp(
-                                    format_recipe(
-                                        recipe,
-                                        chosen_servings,
-                                        display_ingredients,
-                                    )
-                                )
-                                break
+                    input("\nPress Enter to return to the menu...")
 
             case 2:
                 search_recipe_from_user_ingredients(recipes, ingredients_catalog)

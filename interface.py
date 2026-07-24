@@ -1,4 +1,3 @@
-import pprint
 from typing import TypedDict
 from config import INGREDIENTS_FILE
 from ingredients import (
@@ -24,6 +23,50 @@ class DisplayIngredient(TypedDict):
     name:str
     quantity:float
     unit:str  
+
+
+def offer_serving_calculation(recipe:Recipe, 
+                              ingredients_catalog:dict[str, Ingredient], 
+                              use_us_customary:bool = False)->None:
+    if "servings" not in recipe:
+        return
+    while True:
+        change_servings = input(
+                    "Calculate for another number of servings? (Y/N): "
+                    ).strip().upper()
+        if change_servings not in ("Y", "N"):
+            print("Please enter Y or N.")
+            continue
+        if change_servings == "N":
+            break
+        
+        try:
+            chosen_servings = int(input("Enter the number of servings: "))
+        except ValueError:
+            print("Please enter a number.")
+            continue
+        else:
+            if chosen_servings <= 0:
+                print("Please enter a number greater than 0.")
+                continue
+
+            displayed_ingredients = display_ingredients(
+                recipe,
+                ingredients_catalog,
+                target_servings=chosen_servings,
+                use_us_customary=use_us_customary
+            )
+
+            print(
+                format_recipe(
+                    recipe,
+                    chosen_servings,
+                    displayed_ingredients,
+                )
+            )
+            break
+            
+    
 
 def display_ingredients(recipe:Recipe,
                         ingredients_catalog:dict[str, Ingredient], 
@@ -53,18 +96,23 @@ def display_ingredients(recipe:Recipe,
 
     return displayed_ingredients
 
-def format_recipe(recipe:Recipe, number_of_servings:int | None, displayed_ingredients:list[DisplayIngredient]) -> str:
-    result = (
-        f"{recipe['en']}\n"
-        f"Servings: {number_of_servings}\n"
-        f"Ingredients:\n"
-    )
+def format_recipe(recipe:Recipe, number_of_servings:int | None, 
+                  displayed_ingredients:list[DisplayIngredient]) -> str:
+    result = f"{recipe['en']}\n"
+
+    if number_of_servings is not None:
+        result += f"Servings: {number_of_servings}\n"
+    result += f"Ingredients:\n"
+
     for ingredient in displayed_ingredients:
+        quantity = f"{ingredient['quantity']:.2f}".rstrip("0").rstrip(".")
+        unit = ingredient['unit'].replace("_", " ")
         result += (
-            f"- {ingredient['quantity']} "
-            f"{ingredient['unit']} "
+            f"- {quantity} "
+            f"{unit} "
             f"{ingredient['name']}\n"
         )
+
     result += "\nInstructions:\n"
 
     for number, instruction in enumerate(recipe["instructions"], start = 1):
@@ -79,23 +127,30 @@ def create_recipe(recipes, ingredients_catalog) -> tuple[str, Recipe]:
     if recipe_exists(recipes, recipe_name):
          raise ValueError(
              f"{recipe_id} already in the cookbook. Please use 'search' option."
-             )  
-    add_aliases = input(
-        "Would you like to add aliases to this recipe's name? (Y/N): "
-        ).strip().upper()
+             )
+    while True:
+        aliases_choice = input(
+            "Would you like to add aliases to this recipe's name? (Y/N): "
+            ).strip().upper()
+        
+        if aliases_choice in ("Y", "N"):
+            break
+        print("Please enter Y or N.")
+
     aliases = None
-    if add_aliases == "Y":
+    if aliases_choice == "Y":
         aliases = input(
             "Enter an alias. If several, separate by commas: "
             ).strip().split(",")
         
     servings = input("Number of servings (leave blank if not applicable): ").strip()
+
+    ingredients = collect_recipe_ingredients(ingredients_catalog)
+
     instructions = input(
         "Enter instructions. Please separate steps by semi-colons (e.g Melt butter;Add flour): "
         ).strip().split(";")
     
-    ingredients = collect_recipe_ingredients(ingredients_catalog)
-
     recipe: Recipe = {
         "en": recipe_name,
         "ingredients": ingredients,
@@ -122,12 +177,15 @@ def collect_recipe_ingredients(ingredients_catalog:dict[str, Ingredient])->list[
 
     for ingredient in entered_ingredients:
         ingredient = ingredient.strip()
-        quantity = float(input(f"Enter quantity for {ingredient}: "))
         ingredient_id = get_ingredient_id_from_name(ingredients_catalog, ingredient)
-        entered_ingredients_with_quantities.append((ingredient, quantity))
         if ingredient_id is None:
+            quantity = float(input(f"Enter quantity for {ingredient}: "))
             unknown_ingredient.append(ingredient)
-    
+        else:
+            unit = ingredients_catalog[ingredient_id]["base_unit"]
+            quantity = float(input(f"Enter quantity for {ingredient} in {unit}: "))
+        entered_ingredients_with_quantities.append((ingredient, quantity))
+        
     if unknown_ingredient:
         create_ingredient_choice = input(
             f"Unknown ingredients: {', '.join(unknown_ingredient)}. Creation is needed to save your recipe. Create? (Y/N): "
@@ -161,9 +219,9 @@ def create_ingredient(ingredients_catalog:dict[str, Ingredient], ingredient_name
          raise ValueError(
              f"{ingredient_id} already in the ingredients catalog."
              )
-    
+    print(f"\nCreating ingredient: {ingredient_name}")
     add_aliases = input(
-        "Would you like to add aliases to this ingredient's name? (Y/N): "
+        f"Would you like to add aliases for {ingredient_name}? (Y/N): "
         ).strip().upper()
     aliases = None
     if add_aliases == "Y":
@@ -171,7 +229,7 @@ def create_ingredient(ingredients_catalog:dict[str, Ingredient], ingredient_name
             "Enter an alias. If several, separate by commas: "
             ).strip().split(",")
 
-    unit = input(f"Unit {VALID_UNITS}: ").strip().lower()
+    unit = input(f"Unit for {ingredient_name} ({VALID_UNITS}): ").strip().lower()
     if unit not in VALID_UNITS:
         raise ValueError(f"Invalid unit. Please choose from {VALID_UNITS}.")
     is_vegan = input("Is this ingredient vegan? (Y/N): ").strip().upper()
@@ -192,7 +250,7 @@ def create_ingredient(ingredients_catalog:dict[str, Ingredient], ingredient_name
     return ingredient_id, ingredient
 
 
-def search_recipe_from_user_ingredients(recipes: dict[str, Recipe], ingredients_catalog: dict[str, Ingredient]) -> Recipe | None:
+def search_recipe_from_user_ingredients(recipes: dict[str, Recipe], ingredients_catalog: dict[str, Ingredient]) -> None:
     ingredients_research = input(
         "Enter your ingredients. Please separate by commas: "
         ).strip().split(",")
@@ -227,6 +285,28 @@ def search_recipe_from_user_ingredients(recipes: dict[str, Recipe], ingredients_
         if 1 <= recipe_number <= len(matching_recipe_ids):
             break
         print("Invalid number.")
-    recipe_choice = matching_recipe_ids[recipe_number-1]
-    return view_recipe(recipes, recipe_choice)
-   
+    recipe_choice: str = matching_recipe_ids[recipe_number-1]
+    recipe = view_recipe(recipes, recipe_choice)
+
+    unit_choice = input("Use US customary units? (Y/N): ").strip().upper()
+
+    if unit_choice not in ("Y", "N"):
+        raise ValueError("Invalid input. Please enter 'Y' or 'N'.")
+
+    use_us_customary = unit_choice == "Y"
+
+    displayed_ingredients = display_ingredients(
+        recipe,
+        ingredients_catalog,
+        use_us_customary=use_us_customary
+    )
+
+    print(
+        format_recipe(
+            recipe,
+            recipe.get("servings"),
+            displayed_ingredients,
+        )
+    )
+    offer_serving_calculation(recipe, ingredients_catalog, use_us_customary)
+    input("\nPress Enter to return to the menu...")

@@ -1,1 +1,37 @@
-{}
+{
+    "flour": {
+        "base_unit": "g",
+        "en": "flour",
+        "is_vegan": true
+    },
+    "oil": {
+        "aliases": [
+            "sunflower oil",
+            "rapeseed oil",
+            "olive oil"
+        ],
+        "base_unit": "ml",
+        "en": "oil",
+        "is_vegan": true
+    },
+    "salt": {
+        "base_unit": "g",
+        "en": "salt",
+        "is_vegan": true
+    },
+    "sugar": {
+        "base_unit": "g",
+        "en": "sugar",
+        "is_vegan": true
+    },
+    "water": {
+        "base_unit": "ml",
+        "en": "water",
+        "is_vegan": true
+    },
+    "yeast": {
+        "base_unit": "g",
+        "en": "yeast",
+        "is_vegan": true
+    }
+}

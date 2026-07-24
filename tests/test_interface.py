@@ -8,6 +8,7 @@ from interface import (DisplayIngredient, create_recipe,
                        collect_recipe_ingredients,
                        display_ingredients,
                        format_recipe,
+                       offer_serving_calculation,
                        )
 
 class TestInterface(unittest.TestCase):
@@ -183,14 +184,16 @@ class TestInterface(unittest.TestCase):
         }
         ingredients_catalog = {}
         with patch(
-            "builtins.input", side_effect=["flour, water", "1"],
+            "builtins.input", side_effect=["flour, water", "1", "N", ""],
                     ), patch(
                         "interface.get_ingredient_id_from_name",side_effect=["flour", "water"],
                 ), patch(
                     "interface.search_recipes_by_ingredients", return_value=["bread", "omelette"],
                 ), patch(
                     "interface.view_recipe",
-                ) as mock_view_recipe:
+                ) as mock_view_recipe, patch(
+                    "interface.offer_serving_calculation",
+                ):
             search_recipe_from_user_ingredients(recipes, ingredients_catalog)
         mock_view_recipe.assert_called_once_with(recipes, "bread")
     
@@ -390,8 +393,8 @@ class TestInterface(unittest.TestCase):
             "Bread\n"
             "Servings: 4\n"
             "Ingredients:\n"
-            "- 250.0 g Flour\n"
-            "- 100.0 ml Water\n"
+            "- 250 g Flour\n"
+            "- 100 ml Water\n"
             "\nInstructions:\n"
             "1. Mix the ingredients.\n"
             "2. Bake the bread.\n"
@@ -400,3 +403,74 @@ class TestInterface(unittest.TestCase):
         result = format_recipe(recipe, 4, displayed_ingredients)
 
         self.assertEqual(expected, result)
+
+
+    def test_offer_servings_calculation(self):
+        recipe: Recipe = {
+            "en": "Bread", 
+            "servings": 4,
+            "ingredients": [], 
+            "instructions": []
+            }
+        ingredients_catalog: dict[str, Ingredient] = {
+                "flour": {
+                    "en": "Flour",
+                    "base_unit": "g",
+                    "is_vegan": True,
+                    },
+                "water": {
+                    "en": "Water",
+                    "base_unit": "ml",
+                    "is_vegan": True,
+                    },
+        }
+
+        with (
+            patch("builtins.input", side_effect = ["Y", "6"]),
+        patch(
+            "interface.display_ingredients", return_value = [],
+        ) as mock_display_ingredients,
+        patch("interface.format_recipe", return_value = "Bread"),
+        ):
+            offer_serving_calculation(recipe, ingredients_catalog, use_us_customary=True)
+
+        mock_display_ingredients.assert_called_once_with(
+            recipe,
+            ingredients_catalog,
+            target_servings=6,
+            use_us_customary=True,
+        )
+    
+
+    def test_offer_servings_calculation_no_servings(self):
+        recipe = {
+                "en": "Bread", 
+                "ingredients": [], 
+                "instructions": []
+                },
+        ingredients_catalog = {}
+
+        with patch("builtins.input") as mock_input, patch(
+            "interface.display_ingredients"
+            ) as mock_display_ingredients:
+            offer_serving_calculation(recipe, ingredients_catalog)
+
+        mock_input.assert_not_called()
+        mock_display_ingredients.assert_not_called()
+
+
+    def test_offer_servings_calculation_negative_answer(self):
+        recipe = {
+                "en": "Bread", 
+                "servings": 4,
+                "ingredients": [], 
+                "instructions": [],
+                }
+        ingredients_catalog = {}
+
+        with patch("builtins.input", return_value = "N"), patch(
+            "interface.display_ingredients"
+            ) as mock_display_ingredients:
+            offer_serving_calculation(recipe, ingredients_catalog)
+
+        mock_display_ingredients.assert_not_called()
